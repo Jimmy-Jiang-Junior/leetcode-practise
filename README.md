@@ -24,3 +24,9 @@ Hello world!
 [  PASSED  ] 1 test.
 
 基于gtest完成leetcode代码编写和测试用例构造
+
+增加leetcode刷题记录:
+
+单词接龙 （图、BFS、带测试case）
+添加与搜索单词-数据结构设计 （字典树）
+单词替换 （字典树、带测试case）
