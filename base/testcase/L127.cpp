@@ -1,113 +1,95 @@
 #include <iostream>
 #include <cstdio>
 #include <queue>
+#include <unordered_map>
 #include "gtest/gtest.h"
 using namespace std;
 
-vector<vector<int>> adj_; // 邻接表
+// 图中查找最短路径最好使用BFS比较直接, 使用DFS不仅需要做标记, 可能还得为每个节点加上权值
+// 按照两两比较的方式建图需要O(N^2)的时间复杂度, 使用哈希表建图, 时间复杂度为O(C * N), C为字符串的长度
+// 由于题目描述中字符串的长度比较短, 所以使用优化建图的方案时间复杂度低
 class Graph {
 private:
     int v_; // 顶点数目
     int e_; // 边的数目
+    unordered_map<string, int> words_;
 public:
-    Graph(int v) {
-        v_ = v;
+    vector<vector<int>> adj_; // 邻接表
+    Graph() {
+        v_ = 0;
         e_ = 0;
-        adj_ = vector<vector<int>>(v);
     }
-    void addEdge(int v, int w) {
-        adj_[v].push_back(w);
-        adj_[w].push_back(v);
-        e_++;
+    void addWord(string str) {
+        if (words_.count(str) <= 0) {
+            words_.insert(make_pair(str, v_));
+            v_++;
+            adj_.push_back(vector<int>(0));
+        }
     }
-    bool isEdge(string v, string w) {
-        if (v.length() != w.length()) {
-            return false;
-        }
-        int count = 0;
-        for (int i = 0; i < v.length(); i++) {
-            if (v[i] != w[i]) {
-                count++;
-            }
-            if (count > 1) {
-                return false;
-            }
-        }
 
-        return (count == 1) ? true : false;
+    void addEdge(string str) {
+        addWord(str);
+        int index1 = words_[str];
+        for (int i = 0; i < str.length(); i++) {
+            char temp = str[i];
+            str[i] = '*';
+            addWord(str);
+            int index2 = words_[str];
+            adj_[index1].push_back(index2);
+            adj_[index2].push_back(index1);
+            e_++;
+            str[i] = temp;
+        }
     }
     int v() {
         return v_;
     }
-    vector<int> adj(int v) {
-        return adj_[v];
+    int getIndex(string str) {
+        int index = -1;
+        if (words_.count(str) > 0) {
+            index = words_[str];
+        }
+        return index;
     }
 };
 
 class Solution {
-    int minDepth;
-    int targetIndex;
-    vector<string> wordList_;
+    class Graph graph;
 public:
     int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
-        // 如果beginWord不在wordList中, 将beginWord添加进wordList
-        bool matched = false;
-        int beginIndex = 0;
+        graph.addEdge(beginWord);
         for (int i = 0; i < wordList.size(); i++) {
-            if (beginWord == wordList[i]) {
-                matched = true;
-                beginIndex = i;
-                break;
-            }
+            graph.addEdge(wordList[i]);
         }
-        if (!matched) {
-            wordList.push_back(beginWord);
-            beginIndex = wordList.size() - 1;
-        }
-        matched = false;
-        for (int i = 0; i < wordList.size(); i++) {
-            if (endWord == wordList[i]) {
-                matched = true;
-                targetIndex = i;
-                break;
-            }
-        }
-        if (!matched) {
+        int beginIndex = graph.getIndex(beginWord);
+        int endIndex = graph.getIndex(endWord);
+        if (endIndex < 0) {
             return 0;
         }
 
-        class Graph graph(wordList.size());
-        for (int i = 0; i < wordList.size() - 1; i++) {
-            for (int j = 0; j < wordList.size(); j++) {
-                if (graph.isEdge(wordList[i], wordList[j])) {
-                    graph.addEdge(i, j);
-                }
-            }
+        int depth = bfs(beginIndex, endIndex);
+        if (depth > 1) {
+            depth = depth / 2 + 1;
         }
-	    for (int i = 0; i < wordList.size(); i++) {
-            wordList_.push_back(wordList[i]);
-        }
-
-        minDepth = graph.v()  + 1;
-
-        return bfs(beginIndex);
+        return depth;
     }
-    int bfs(int index) {
+
+    int bfs(int beginIndex, int endIndex) {
         queue<int> q;
-        vector<bool> marked(adj_.size(), false);
-        marked[index] = true;
-        q.push(index);
+        vector<bool> marked(graph.adj_.size(), false);
+        marked[beginIndex] = true;
+        q.push(beginIndex);
         bool matched = false;
         int depth = 1;
         while (!q.empty()) {
             int num = q.size();
             for (int i = 0; i < num; i++) {
                 int v = q.front();
-                if (v == targetIndex) {
+                if (v == endIndex) {
                     matched = true;
                 } else {
-                    for (int j = 0; j < adj_[v].size(); j++) {
-                        int next = adj_[v][j];
+                    for (int j = 0; j < graph.adj_[v].size(); j++) {
+                        int next = graph.adj_[v][j];
                         if (!marked[next]) {
                             marked[next] = true; // 及时做好marked的标记, 减少加入队列的数目
                             q.push(next);
