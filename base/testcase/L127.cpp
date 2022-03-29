@@ -67,7 +67,8 @@ public:
             return 0;
         }
 
-        int depth = bfs(beginIndex, endIndex);
+//       int depth = bfs(beginIndex, endIndex);
+        int depth = twoWayBfs(beginIndex, endIndex);
         if (depth > 1) {
             depth = depth / 2 + 1;
         }
@@ -105,6 +106,62 @@ public:
         }
 
         return matched ? depth : 0;
+    }
+
+    // 双向广度优先搜索的实现(Breath First Search)
+    int twoWayBfs(int beginIndex, int endIndex) {
+        if (beginIndex == endIndex) {
+            return 1;
+        }
+
+        queue<int> beginQueue;
+        vector<bool> beginMarked(graph.adj_.size(), false);
+        beginMarked[beginIndex] = true;
+        beginQueue.push(beginIndex);
+        int beginDepth = 1;
+
+        queue<int> endQueue;
+        vector<bool> endMarked(graph.v(), false);
+        endMarked[endIndex] = true;
+        endQueue.push(endIndex);
+        int endDepth = 1;
+
+        bool matched = false;
+        while ((!beginQueue.empty()) && (!endQueue.empty())) {
+            int beginSize = beginQueue.size();
+            for (int i = 0; i < beginSize; i++) {
+                int v = beginQueue.front();
+                beginQueue.pop();
+                for (int j = 0; j < graph.adj_[v].size(); j++) {
+                    int next = graph.adj_[v][j];
+                    if (endMarked[next]) {
+                        return (beginDepth + endDepth);
+                    } else if (!beginMarked[next]) {
+                        beginMarked[next] = true;
+                        beginQueue.push(next);
+                    }
+                }
+            }
+            beginDepth++;
+
+            int endSize = endQueue.size();
+            for (int i = 0; i < endSize; i++) {
+                int v = endQueue.front();
+                endQueue.pop();
+                for (int j = 0; j < graph.adj_[v].size(); j++) {
+                    int next = graph.adj_[v][j];
+                    if (beginMarked[next]) {
+                        return (beginDepth + endDepth);
+                    } else if (!endMarked[next]) {
+                        endMarked[next] = true;
+                        endQueue.push(next);
+                    }
+                }
+            }
+            endDepth++;
+        }
+
+        return 0;
     }
 };
 
