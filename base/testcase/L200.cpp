@@ -74,6 +74,50 @@ private:
     
 };
 
+// 加权union-find算法的实现
+class WeightedQuickUnionUF {
+private:
+    vector<int> id_; // 父链接数组（由触点索引）
+    vector<int> sz_; // (由触点索引的)各个根节点所对应的分量的大小
+    int count_; // 联通分量的数量
+public:
+    WeightedQuickUnionUF(int N) {
+        count_ = N;
+        id_ = vector<int>(N, 0);
+        for (int i = 0; i < N; i++) {
+            id_[i] = i;
+        }
+        sz_ = vector<int>(N, 1);
+    }
+    int count() {
+        return count_;
+    }
+    bool connected(int p, int q) {
+        return find(p) == find(q);
+    }
+    int find(int p) {
+        while (p != id_[p]) {
+            p = id_[p];
+        }
+        return p;
+    }
+    void union1(int p, int q) {
+        int i = find(p);
+        int j = find(q);
+        if (i == j) {
+            return;
+        }
+        if (sz_[i] < sz_[j]) {
+            id_[i] = j;
+            sz_[j] += sz_[i];
+        } else {
+            id_[j] = i;
+            sz_[i] += sz_[j];
+        }
+        count_--;
+    }
+};
+
 class Solution {
 public:
     int numIslands(vector<vector<char>>& grid) {
@@ -121,8 +165,17 @@ public:
             }
         }
 
-        CC cc(graph);
-        return cc.count();
+     //   CC cc(graph);
+     //   return cc.count();
+        
+        WeightedQuickUnionUF weightedQuickUnionUF(graph.V());
+        for (int i = 0; i < graph.V(); i++) {
+            for (int j = 0; j < graph.adj(i).size(); j++) {
+                weightedQuickUnionUF.union1(i, graph.adj(i)[j]);
+            }
+        }
+
+        return weightedQuickUnionUF.count();
     }
 };
 
