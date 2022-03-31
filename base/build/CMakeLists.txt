@@ -7,7 +7,8 @@ set(SOURCE_FILE
 set(TEST_FILE
 #    ${TOP_DIR}/testcase/GtestBase.cpp
 #    ${TOP_DIR}/testcase/L648.cpp
-    ${TOP_DIR}/testcase/L127.cpp
+#    ${TOP_DIR}/testcase/L127.cpp
+    ${TOP_DIR}/testcase/L200.cpp
 )
 
 add_executable(test
