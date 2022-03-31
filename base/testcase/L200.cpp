@@ -126,10 +126,10 @@ public:
     }
 };
 
-TEST(L127, CASE_002)
+TEST(L200, CASE_001)
 {
     class Solution s;
-    char cGrid[4][5] = {
+    char cGrid[][5] = {
         {'1','1','1','1','0'},
         {'1','1','0','1','0'},
         {'1','1','0','0','0'},
@@ -146,4 +146,26 @@ TEST(L127, CASE_002)
     }
     int result = s.numIslands(grid);
     EXPECT_EQ(1, result);
+}
+
+TEST(L200, CASE_002)
+{
+    class Solution s;
+    char cGrid[4][5][2] = {
+        {"1","1","0","0","0"},
+        {"1","1","0","0","0"},
+        {"0","0","1","0","0"},
+        {"0","0","0","1","1"},
+    };
+    int row = sizeof(cGrid) / 10;
+    int col = 5;
+
+    vector<vector<char>> grid(row, vector<char>(col, 0));
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            grid[i][j] = cGrid[i][j][0];
+        }
+    }
+    int result = s.numIslands(grid);
+    EXPECT_EQ(3, result);
 }
