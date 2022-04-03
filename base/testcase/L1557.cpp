@@ -15,7 +15,7 @@ public:
                 outVertex.push_back(i);
             }
         }
-        
+
         return outVertex;
     }
 };
